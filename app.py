@@ -2,7 +2,8 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 from linebot.exceptions import InvalidSignatureError
-import anthropic
+from google import genai
+from google.genai import types
 import os
 import logging
 from dotenv import load_dotenv
@@ -17,15 +18,15 @@ app = Flask(__name__)
 # ตรวจสอบว่ามีค่าใน Environment Variables หรือไม่
 line_access_token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 line_secret = os.environ.get("LINE_CHANNEL_SECRET")
-claude_api_key = os.environ.get("ANTHROPIC_API_KEY")
+gemini_api_key = os.environ.get("GEMINI_API_KEY")
 
-if not all([line_access_token, line_secret, claude_api_key]):
+if not all([line_access_token, line_secret, gemini_api_key]):
     logger.error("Missing environment variables. Please check your .env file.")
     exit(1)
 
 line_bot_api = LineBotApi(line_access_token)
 handler = WebhookHandler(line_secret)
-claude = anthropic.Anthropic(api_key=claude_api_key)
+gemini_client = genai.Client(api_key=gemini_api_key)
 
 SYSTEM_PROMPT = """คุณคือ "นายดี" ผู้ช่วยด้านกฎหมายไทย
 เชี่ยวชาญเรื่องการถูกทวงหนี้ผิดกฎหมาย
@@ -54,15 +55,17 @@ def handle_message(event):
     user_message = event.message.text
     
     try:
-        response = claude.messages.create(
-            model="claude-3-5-sonnet-20240620",
-            max_tokens=1000,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": user_message}]
+        response = gemini_client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=user_message,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                max_output_tokens=1000,
+            ),
         )
-        reply = response.content[0].text
+        reply = response.text
     except Exception as e:
-        logger.error(f"Anthropic API Error: {e}")
+        logger.error(f"Gemini API Error: {e}")
         reply = "ขออภัยครับ ขณะนี้ระบบประมวลผลขัดข้อง กรุณาลองใหม่อีกครั้งในภายหลัง"
 
     try:
