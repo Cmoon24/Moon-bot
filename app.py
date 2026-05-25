@@ -2,7 +2,8 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
-    QuickReply, QuickReplyButton, MessageAction
+    QuickReply, QuickReplyButton, MessageAction,
+    FollowEvent
 )
 from linebot.exceptions import InvalidSignatureError
 from google import genai
@@ -76,6 +77,19 @@ def webhook():
         logger.error("Invalid signature. Check your channel access token/channel secret.")
         abort(400)
     return 'OK'
+
+@handler.add(FollowEvent)
+def handle_follow(event):
+    try:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(
+                text=WELCOME_MESSAGE,
+                quick_reply=QUICK_REPLIES
+            )
+        )
+    except Exception as e:
+        logger.error(f"Line Reply Follow Error: {e}")
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
