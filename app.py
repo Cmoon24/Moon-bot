@@ -1,6 +1,9 @@
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+    QuickReply, QuickReplyButton, MessageAction
+)
 from linebot.exceptions import InvalidSignatureError
 from google import genai
 from google.genai import types
@@ -29,10 +32,34 @@ handler = WebhookHandler(line_secret)
 gemini_client = genai.Client(api_key=gemini_api_key)
 
 SYSTEM_PROMPT = """คุณคือ "นายดี" ผู้ช่วยด้านกฎหมายไทย
-เชี่ยวชาญเรื่องการถูกทวงหนี้ผิดกฎหมาย
-ตอบเป็นภาษาไทยเข้าใจง่าย บอก action plan ชัดเจน
-ทุกคำตอบต้องจบด้วย disclaimer ว่าเป็นข้อมูลเบื้องต้น
-ไม่ใช่คำแนะนำทางกฎหมายอย่างเป็นทางการ"""
+เชี่ยวชาญเรื่องสิทธิ์ของประชาชนไทยทั่วไป
+ตอบเป็นภาษาไทยเข้าใจง่าย บอก action plan ชัดเจนทีละขั้น
+ทุกคำตอบต้องจบด้วย disclaimer สั้นๆ ว่าเป็นข้อมูลเบื้องต้น ไม่ใช่คำแนะนำทางกฎหมายอย่างเป็นทางการ"""
+
+# Quick reply จากข้อมูล Facebook ที่พบบ่อยที่สุด
+QUICK_REPLIES = QuickReply(items=[
+    QuickReplyButton(action=MessageAction(
+        label="🦈 ถูกทวงหนี้ผิดกฎหมาย",
+        text="ถูกทวงหนี้ผิดกฎหมาย โทรมาขู่ทำให้อับอาย ผมมีสิทธิ์ทำอะไรได้บ้าง?"
+    )),
+    QuickReplyButton(action=MessageAction(
+        label="💸 ไม่ได้รับเงินที่ตกลงไว้",
+        text="ตกลงซื้อขายกันแล้วแต่อีกฝ่ายไม่จ่ายเงิน หรือไม่ส่งของตามสัญญา ทำยังไงได้บ้าง?"
+    )),
+    QuickReplyButton(action=MessageAction(
+        label="🏠 ปัญหามรดกและที่ดิน",
+        text="มีปัญหาเรื่องมรดกหรือที่ดิน ผู้จัดการมรดกไม่แบ่งให้ยุติธรรม ทำยังไงได้บ้าง?"
+    )),
+    QuickReplyButton(action=MessageAction(
+        label="⚖️ ถามเรื่องอื่น",
+        text="อยากถามเรื่องกฎหมายอื่นๆ"
+    )),
+])
+
+WELCOME_MESSAGE = """สวัสดีครับ! ผมนายดี 👋
+ผู้ช่วยด้านกฎหมายไทยที่พูดภาษาคนธรรมดา
+
+พิมพ์ปัญหาของคุณได้เลย หรือเลือกหัวข้อที่เจอบ่อยด้านล่างครับ 👇"""
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -54,6 +81,21 @@ def webhook():
 def handle_message(event):
     user_message = event.message.text
     
+    # Welcome message เมื่อพิมพ์ครั้งแรกหรือ greeting
+    greetings = ["สวัสดี", "หวัดดี", "hello", "hi", "เริ่ม", "start"]
+    if any(g in user_message.lower() for g in greetings):
+        try:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(
+                    text=WELCOME_MESSAGE,
+                    quick_reply=QUICK_REPLIES
+                )
+            )
+        except Exception as e:
+            logger.error(f"Line Reply Welcome Error: {e}")
+        return
+
     try:
         max_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", 8192))
         response = gemini_client.models.generate_content(
@@ -72,12 +114,17 @@ def handle_message(event):
     try:
         # LINE limits text messages to 5000 characters. Split the reply into chunks of 4900 characters.
         limit = 4900
-        messages = [TextSendMessage(text=reply[i:i+limit]) for i in range(0, len(reply), limit)]
+        chunks = [reply[i:i+limit] for i in range(0, len(reply), limit)][:5]
+        messages = []
+        for idx, chunk in enumerate(chunks):
+            if idx == len(chunks) - 1:
+                messages.append(TextSendMessage(text=chunk, quick_reply=QUICK_REPLIES))
+            else:
+                messages.append(TextSendMessage(text=chunk))
         
-        # LINE only allows up to 5 messages per reply token
         line_bot_api.reply_message(
             event.reply_token,
-            messages[:5]
+            messages
         )
     except Exception as e:
         logger.error(f"Line Reply Error: {e}")
