@@ -155,10 +155,10 @@ def handle_follow(event):
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(
+            [TextSendMessage(
                 text=WELCOME_MESSAGE,
                 quick_reply=QUICK_REPLIES
-            )
+            )]
         )
     except Exception as e:
         logger.error(f"Line Reply Follow Error: {e}")
@@ -173,10 +173,10 @@ def handle_message(event):
         try:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(
+                [TextSendMessage(
                     text=WELCOME_MESSAGE,
                     quick_reply=QUICK_REPLIES
-                )
+                )]
             )
         except Exception as e:
             logger.error(f"Line Reply Welcome Error: {e}")
@@ -189,7 +189,7 @@ def handle_message(event):
         try:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=limit_message)
+                [TextSendMessage(text=limit_message)]
             )
         except Exception as e:
             logger.error(f"Line Reply Rate Limit Error: {e}")
@@ -242,9 +242,34 @@ def handle_message(event):
                 full += sources_text
                 
         except (json.JSONDecodeError, ValueError) as json_err:
-            logger.warning(f"Failed to parse Gemini JSON: {json_err}. Falling back to raw text.")
-            full = response.text
-            summary = (full[:400] + "...\n\n(นี่คือคำตอบย่อ กรุณากดปุ่มด้านล่างเพื่อดูคำตอบเต็ม)") if len(full) > 400 else full
+            logger.warning(f"Failed to parse Gemini JSON: {json_err}. Falling back to regex extraction.")
+            # Use regex to extract summary and full answer from truncated or malformed JSON
+            import re
+            summary_match = re.search(r'"summary"\s*:\s*"(.*?)"', response.text, re.DOTALL)
+            full_match = re.search(r'"full"\s*:\s*"(.*?)"', response.text, re.DOTALL)
+            
+            if summary_match or full_match:
+                try:
+                    summary = summary_match.group(1).encode().decode('unicode-escape', errors='ignore') if summary_match else ""
+                except Exception:
+                    summary = summary_match.group(1) if summary_match else ""
+                    
+                try:
+                    full = full_match.group(1).encode().decode('unicode-escape', errors='ignore') if full_match else ""
+                except Exception:
+                    full = full_match.group(1) if full_match else ""
+                
+                # Replace escaped newlines and double quotes
+                summary = summary.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
+                full = full.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
+            else:
+                summary = ""
+                full = ""
+
+            if not summary or not full:
+                # If regex fails completely, fall back to raw text stripping JSON structure
+                full = response.text
+                summary = (full[:400] + "...\n\n(นี่คือคำตอบย่อ กรุณากดปุ่มด้านล่างเพื่อดูคำตอบเต็ม)") if len(full) > 400 else full
 
         # Cache the full response
         user_last_response[user_id] = full
@@ -266,10 +291,10 @@ def handle_message(event):
         try:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(
+                [TextSendMessage(
                     text="ขออภัยครับ ขณะนี้ระบบประมวลผลขัดข้อง กรุณาลองใหม่อีกครั้งในภายหลัง",
                     quick_reply=QUICK_REPLIES
-                )
+                )]
             )
         except Exception as e_reply:
             logger.error(f"Failed to reply error message: {e_reply}")
@@ -287,10 +312,10 @@ def handle_postback(event):
             try:
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(
+                    [TextSendMessage(
                         text="ขออภัยครับ ข้อมูลคำตอบหมดอายุแล้ว กรุณาส่งคำถามใหม่อีกครั้งครับ 🙏",
                         quick_reply=QUICK_REPLIES
-                    )
+                    )]
                 )
             except Exception as e:
                 logger.error(f"Line Reply Expired Postback Error: {e}")
