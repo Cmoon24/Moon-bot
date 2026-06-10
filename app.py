@@ -221,6 +221,7 @@ def load_obsidian_knowledge(vault_path):
 # Limits to save tokens and prevent billing abuse
 RATE_LIMIT_PER_MINUTE = 5
 RATE_LIMIT_PER_DAY = 50
+RATE_LIMIT_TOKENS_PER_DAY = int(os.environ.get("RATE_LIMIT_TOKENS_PER_DAY", 100000))
 
 class SourceItem(BaseModel):
     title: str = Field(description="ชื่อกฎหมาย มาตรา หรือชื่อหน่วยงานรัฐบาลที่เป็นแหล่งอ้างอิง เช่น พระราชบัญญัติการทวงถามหนี้ พ.ศ. 2558, เว็บไซต์กรมบังคับคดี")
@@ -297,6 +298,7 @@ def get_quota_status(user_id):
                 'limit': RATE_LIMIT_PER_DAY,
                 'remaining': remaining,
                 'total_tokens': total_tokens,
+                'token_limit': RATE_LIMIT_TOKENS_PER_DAY,
                 'next_reset_timestamp': next_reset_time,
                 'next_reset_in_seconds': next_reset_in_seconds
             }
@@ -336,11 +338,13 @@ def is_rate_limited(user_id):
             # Clean up old timestamps older than 24 hours to keep table small
             cursor.execute('DELETE FROM rate_limits WHERE timestamp < ?', (one_day_ago,))
             
-            # Check daily limit
-            cursor.execute('SELECT timestamp FROM rate_limits WHERE user_id = ? AND timestamp >= ? ORDER BY timestamp ASC', (user_id_hashed, one_day_ago))
+            # Fetch all timestamps and tokens in the last 24 hours
+            cursor.execute('SELECT timestamp, tokens FROM rate_limits WHERE user_id = ? AND timestamp >= ? ORDER BY timestamp ASC', (user_id_hashed, one_day_ago))
             rows = cursor.fetchall()
             day_count = len(rows)
+            total_tokens_used = sum(r[1] for r in rows if r[1] is not None)
             
+            # Check daily request count limit
             if day_count >= RATE_LIMIT_PER_DAY:
                 oldest_timestamp = rows[0][0]
                 next_reset = oldest_timestamp + 86400
@@ -348,6 +352,25 @@ def is_rate_limited(user_id):
                 wait_str = format_relative_time(wait_seconds)
                 next_reset_str = format_thai_datetime(next_reset)
                 return True, f"ขออภัยครับ คุณใช้งานครบกำหนดสูงสุดต่อวัน ({RATE_LIMIT_PER_DAY} ครั้ง/วัน) แล้ว จะสามารถใช้งานครั้งต่อไปได้ในอีก {wait_str} ({next_reset_str}) 🙏", 0.0
+                
+            # Check daily token quota limit
+            if total_tokens_used >= RATE_LIMIT_TOKENS_PER_DAY:
+                # Calculate when total tokens drops below the limit
+                accumulated_tokens = total_tokens_used
+                next_reset_timestamp = None
+                for row_timestamp, row_tokens in rows:
+                    accumulated_tokens -= (row_tokens or 0)
+                    if accumulated_tokens < RATE_LIMIT_TOKENS_PER_DAY:
+                        next_reset_timestamp = row_timestamp + 86400
+                        break
+                
+                if next_reset_timestamp is None:
+                    next_reset_timestamp = now + 86400 # fallback
+                    
+                wait_seconds = next_reset_timestamp - now
+                wait_str = format_relative_time(wait_seconds)
+                next_reset_str = format_thai_datetime(next_reset_timestamp)
+                return True, f"ขออภัยครับ คุณใช้งานโควต้าจำนวนคำ/ข้อความ (Tokens) ครบกำหนดสูงสุดต่อวัน ({RATE_LIMIT_TOKENS_PER_DAY:,} tokens/วัน) แล้ว จะสามารถใช้งานครั้งต่อไปได้ในอีก {wait_str} ({next_reset_str}) 🙏", 0.0
                 
             # Check minute limit (60 seconds)
             cursor.execute('SELECT COUNT(*) FROM rate_limits WHERE user_id = ? AND timestamp >= ?', (user_id_hashed, one_minute_ago))
@@ -714,11 +737,12 @@ def process_message_async(event):
                 limit = status['limit']
                 remaining = status['remaining']
                 total_tokens = status['total_tokens']
+                token_limit = status['token_limit']
                 
                 msg = "📊 *สถานะการใช้งานโควต้าของคุณ*\n\n"
                 msg += f"• ใช้งานไปแล้ว: {used} / {limit} ครั้ง\n"
                 msg += f"• คงเหลือ: {remaining} ครั้ง\n"
-                msg += f"• ปริมาณ Token ที่ใช้: {total_tokens:,} tokens\n\n"
+                msg += f"• ปริมาณ Token ที่ใช้: {total_tokens:,} / {token_limit:,} tokens\n\n"
                 
                 if used > 0:
                     next_reset = status['next_reset_timestamp']
