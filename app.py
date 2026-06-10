@@ -157,6 +157,20 @@ def init_db():
                 )
             ''')
             
+            # Question-Answer cache table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS qa_cache (
+                    user_id TEXT,
+                    question TEXT,
+                    summary TEXT,
+                    full_answer TEXT,
+                    is_legal_question INTEGER,
+                    timestamp REAL,
+                    PRIMARY KEY (user_id, question)
+                )
+            ''')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_qa_cache_user_question ON qa_cache(user_id, question)')
+            
             conn.commit()
             logger.info("Database initialized successfully.")
         migrate_database_user_ids()
@@ -419,6 +433,52 @@ def get_cached_response(user_id):
     except Exception as e:
         logger.error(f"Database error in get_cached_response: {e}")
     return None
+
+def get_qa_cache(user_id, question):
+    user_id_hashed = hash_user_id(user_id)
+    if not user_id_hashed or not question:
+        return None
+    cleaned_question = question.strip().lower()
+    now = time.time()
+    # Cache TTL: 24 hours (86400 seconds)
+    ttl_limit = now - 86400
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT summary, full_answer, is_legal_question 
+                FROM qa_cache 
+                WHERE user_id = ? AND question = ? AND timestamp >= ?
+            ''', (user_id_hashed, cleaned_question, ttl_limit))
+            row = cursor.fetchone()
+            if row:
+                return {
+                    'summary': row[0],
+                    'full_answer': row[1],
+                    'is_legal_question': bool(row[2])
+                }
+    except Exception as e:
+        logger.error(f"Error reading from qa_cache: {e}")
+    return None
+
+def save_qa_cache(user_id, question, summary, full_answer, is_legal_question):
+    user_id_hashed = hash_user_id(user_id)
+    if not user_id_hashed or not question:
+        return
+    cleaned_question = question.strip().lower()
+    now = time.time()
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT OR REPLACE INTO qa_cache (user_id, question, summary, full_answer, is_legal_question, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (user_id_hashed, cleaned_question, summary, full_answer, int(is_legal_question), now))
+            # Clean up old cache entries older than 3 days to keep database small
+            cursor.execute('DELETE FROM qa_cache WHERE timestamp < ?', (now - 259200,))
+            conn.commit()
+    except Exception as e:
+        logger.error(f"Error saving to qa_cache: {e}")
 
 def add_chat_turn(user_id, role, text):
     user_id = hash_user_id(user_id)
@@ -795,6 +855,37 @@ def process_message_async(event):
                 logger.error(f"Line Reply Rate Limit Error: {e}")
             return
 
+        # Lookup QA cache to save Gemini API tokens if user asks the duplicate question
+        cached_res = get_qa_cache(user_id, user_message)
+        if cached_res:
+            logger.info(f"QA cache hit for user {user_id} and question: {user_message}")
+            summary = cached_res['summary']
+            full = cached_res['full_answer']
+            is_legal_question = cached_res['is_legal_question']
+            
+            # Cache the full response for the Postback button ("Read full answer")
+            cache_full_response(user_id, full)
+            
+            # Save to chat history
+            add_chat_turn(user_id, "user", user_message)
+            add_chat_turn(user_id, "model", summary)
+            
+            # Create quick replies and send response
+            if is_legal_question:
+                reply_items = [
+                    QuickReplyButton(action=PostbackAction(
+                        label="📖 อ่านคำตอบแบบเต็ม",
+                        data="action=show_full"
+                    ))
+                ]
+                reply_items.extend(QUICK_REPLIES.items)
+                summary_quick_reply = QuickReply(items=reply_items)
+            else:
+                summary_quick_reply = QUICK_REPLIES
+                
+            send_split_messages(event.reply_token, summary, summary_quick_reply)
+            return
+
         try:
             # Load Obsidian knowledge dynamically
             obsidian_vault_path = os.environ.get("OBSIDIAN_VAULT_PATH", r"c:\llm wiki\gemini second brain")
@@ -900,6 +991,9 @@ def process_message_async(event):
     
             # Cache the full response in database
             cache_full_response(user_id, full)
+            
+            # Save to QA cache for future duplicate queries
+            save_qa_cache(user_id, user_message, summary, full, is_legal_question)
             
             # Save user query and assistant response to chat history
             add_chat_turn(user_id, "user", user_message)
