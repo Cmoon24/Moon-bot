@@ -1128,6 +1128,7 @@ def process_message_async(event):
         if any(keyword in user_message.lower().strip() for keyword in reset_keywords):
             clear_chat_history(user_id)
             clear_user_state(user_id)
+            clear_user_caches(user_id)
             try:
                 line_bot_api.reply_message(
                     event.reply_token,
