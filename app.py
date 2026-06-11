@@ -1158,9 +1158,10 @@ def process_message_async(event):
                 logger.error(f"Line Reply New Chat Error: {e}")
             return
 
-        # Welcome message เมื่อพิมพ์ครั้งแรกหรือ greeting
-        greetings = ["สวัสดี", "หวัดดี", "hello", "hi", "เริ่ม", "start"]
-        if any(g in user_message.lower() for g in greetings):
+        # Welcome message เมื่อพิมพ์ครั้งแรกหรือ greeting (Exact Match เพื่อเลี่ยงปัญหาชนกับคำในประโยคคำถาม)
+        greetings = ["สวัสดี", "สวัสดีครับ", "สวัสดีค่ะ", "หวัดดี", "hello", "hi", "เริ่ม", "start", "เริ่มแชท", "เริ่มแชทใหม่"]
+        cleaned_msg = user_message.lower().strip()
+        if cleaned_msg in greetings:
             clear_chat_history(user_id)
             try:
                 line_bot_api.reply_message(
@@ -1238,7 +1239,7 @@ def process_message_async(event):
             
             max_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", 3000))
             response = gemini_client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.5-flash-lite',
                 contents=gemini_contents,
                 config=types.GenerateContentConfig(
                     system_instruction=full_system_prompt,
@@ -1393,7 +1394,7 @@ def process_image_async(event):
 
             max_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", 3000))
             response = gemini_client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.5-flash-lite',
                 contents=gemini_contents,
                 config=types.GenerateContentConfig(
                     system_instruction=full_system_prompt,
