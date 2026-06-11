@@ -1,0 +1,227 @@
+{
+  "main": {
+    "id": "e347d3ccc99ba887",
+    "type": "split",
+    "children": [
+      {
+        "id": "f22b647b2eabea08",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7c90b9131a5204fd",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "cb90e01a3ef24739",
+    "type": "split",
+    "children": [
+      {
+        "id": "5d004a1d3b703694",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0333e0c01c00843b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "e310b8ffacbe3693",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "1da393375d9ab702",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ff183fa5923a98df",
+    "type": "split",
+    "children": [
+      {
+        "id": "5ad62652ad880116",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "261f5739f98272db",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Welcome.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Welcome"
+            }
+          },
+          {
+            "id": "1b2ffde2233269a1",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Welcome.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Welcome"
+            }
+          },
+          {
+            "id": "8caed1c99b1fbccf",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "30c73ee33dfac7bf",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "ca4e8e5c534167e6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Welcome.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Welcome"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "7c90b9131a5204fd",
+  "lastOpenFiles": [
+    "ความปลอดภัย.md",
+    "2026-05-27.md",
+    "wiki/03-civil-regulatory-law/working-conditions.md",
+    "wiki/03-civil-regulatory-law/land-code-summary.md",
+    "wiki/03-civil-regulatory-law/consumer-rights.md",
+    "wiki/03-civil-regulatory-law/ccc-loan-guarantee-summary.md",
+    "raw/พระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544.md",
+    "wiki/03-civil-regulatory-law/will-testament.md",
+    "wiki/03-civil-regulatory-law/statutory-heir.md",
+    "wiki/03-civil-regulatory-law/severance-pay.md",
+    "wiki/03-civil-regulatory-law/ocpb.md",
+    "wiki/03-civil-regulatory-law/loan-contract.md",
+    "wiki/03-civil-regulatory-law/land-title-deed.md",
+    "wiki/03-civil-regulatory-law/land-code.md",
+    "wiki/03-civil-regulatory-law/land-abandonment.md",
+    "wiki/03-civil-regulatory-law/labor-rights.md",
+    "wiki/03-civil-regulatory-law/labor-protection-act-summary.md",
+    "wiki/03-civil-regulatory-law/inheritance-law.md",
+    "wiki/03-civil-regulatory-law/inheritance-law-summary.md",
+    "wiki/03-civil-regulatory-law/guarantee-contract.md",
+    "wiki/03-civil-regulatory-law/debtor-rights.md",
+    "wiki/03-civil-regulatory-law/debt-collector-prohibitions.md",
+    "wiki/03-civil-regulatory-law/debt-collection-act-2015.md",
+    "wiki/03-civil-regulatory-law/debt-collection-act-2015-summary.md",
+    "wiki/03-civil-regulatory-law/consumer-protection-act-summary.md",
+    "wiki/02-digital-it-law/e-signature.md",
+    "wiki/00-meta/concepts.base",
+    "wiki/00-meta/architecture.canvas",
+    "wiki/03-civil-regulatory-law",
+    "wiki/02-digital-it-law",
+    "wiki/01-knowledge-management",
+    "wiki/00-meta",
+    "Untitled 3.canvas",
+    "wiki/concepts.base",
+    "wiki/architecture.canvas",
+    "Untitled 2.canvas",
+    "Untitled 1.canvas",
+    "Untitled.canvas",
+    "Untitled.base",
+    "obsidian-skills/skills/obsidian-markdown/references",
+    "obsidian-skills/skills/json-canvas/references",
+    "obsidian-skills/skills/obsidian-bases/references"
+  ]
+}

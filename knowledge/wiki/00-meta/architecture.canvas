@@ -1,0 +1,592 @@
+{
+  "nodes": [
+    {
+      "id": "26596284ef6600d9",
+      "type": "file",
+      "file": "wiki/01-knowledge-management/zettelkasten-method-summary.md",
+      "x": 50,
+      "y": 50,
+      "width": 300,
+      "height": 100,
+      "color": "4"
+    },
+    {
+      "id": "221fd96128bb04cb",
+      "type": "file",
+      "file": "wiki/01-knowledge-management/zettelkasten-method.md",
+      "x": 50,
+      "y": 200,
+      "width": 300,
+      "height": 100,
+      "color": "4"
+    },
+    {
+      "id": "82fa031cfc4ed904",
+      "type": "file",
+      "file": "wiki/01-knowledge-management/niklas-luhmann.md",
+      "x": 50,
+      "y": 350,
+      "width": 300,
+      "height": 100,
+      "color": "4"
+    },
+    {
+      "id": "229e5d6b53a325bf",
+      "type": "file",
+      "file": "wiki/01-knowledge-management/slip-box.md",
+      "x": 50,
+      "y": 500,
+      "width": 300,
+      "height": 100,
+      "color": "4"
+    },
+    {
+      "id": "13de46332b8f3b52",
+      "type": "group",
+      "label": "Knowledge Management",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 650,
+      "color": "4"
+    },
+    {
+      "id": "7ba8599e1342776e",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/pdpa-summary.md",
+      "x": 550,
+      "y": 50,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "4f81d82c7ccbb345",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/pdpa.md",
+      "x": 550,
+      "y": 200,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "192ac9334f006290",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/legal-bases-pdpa.md",
+      "x": 550,
+      "y": 350,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "50ce9a4ff6d74295",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/electronic-transactions-act-summary.md",
+      "x": 550,
+      "y": 500,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "59545a9b0a14788b",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/e-transactions.md",
+      "x": 550,
+      "y": 650,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "9264edc0b5f590bb",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/e-signature.md",
+      "x": 550,
+      "y": 800,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "8d96163e22f44e72",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/computer-crime-act-summary.md",
+      "x": 550,
+      "y": 950,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "f45b97c0688900bb",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/computer-crime.md",
+      "x": 550,
+      "y": 1100,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "f54a8697cf0538bd",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/digital-evidence.md",
+      "x": 550,
+      "y": 1250,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "986079e3675caba1",
+      "type": "file",
+      "file": "wiki/02-digital-it-law/traffic-data.md",
+      "x": 550,
+      "y": 1400,
+      "width": 300,
+      "height": 100,
+      "color": "5"
+    },
+    {
+      "id": "61533187b3a37019",
+      "type": "group",
+      "label": "Digital/IT Law",
+      "x": 500,
+      "y": 0,
+      "width": 400,
+      "height": 1550,
+      "color": "5"
+    },
+    {
+      "id": "bdb2cb476978778b",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/inheritance-law-summary.md",
+      "x": 1050,
+      "y": 50,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "91bf65aa9eeefb46",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/inheritance-law.md",
+      "x": 1050,
+      "y": 200,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "a42fa33318e1fd22",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/statutory-heir.md",
+      "x": 1050,
+      "y": 350,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "a573ac8578321b70",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/will-testament.md",
+      "x": 1050,
+      "y": 500,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "e3b07f136086a7ca",
+      "type": "group",
+      "label": "Inheritance",
+      "x": 1025,
+      "y": 30,
+      "width": 350,
+      "height": 620,
+      "color": "1"
+    },
+    {
+      "id": "0a73dbdad1e0f50b",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/land-code-summary.md",
+      "x": 1050,
+      "y": 650,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "ad1feda494711872",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/land-code.md",
+      "x": 1050,
+      "y": 800,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "e5faa0dac13ddfa5",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/land-title-deed.md",
+      "x": 1050,
+      "y": 950,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "b991896fe80cddac",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/land-abandonment.md",
+      "x": 1050,
+      "y": 1100,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "3aaeb3c4b0c7626b",
+      "type": "group",
+      "label": "Land",
+      "x": 1025,
+      "y": 630,
+      "width": 350,
+      "height": 620,
+      "color": "1"
+    },
+    {
+      "id": "deda0d064a6cad1a",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/labor-protection-act-summary.md",
+      "x": 1050,
+      "y": 1250,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "8cb2dbed24e39dc0",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/labor-rights.md",
+      "x": 1050,
+      "y": 1400,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "26cc9a3bfe5690be",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/severance-pay.md",
+      "x": 1050,
+      "y": 1550,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "4feac2ed3abda2f4",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/working-conditions.md",
+      "x": 1050,
+      "y": 1700,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "8f55f1ddb75da2f0",
+      "type": "group",
+      "label": "Labor",
+      "x": 1025,
+      "y": 1230,
+      "width": 350,
+      "height": 620,
+      "color": "1"
+    },
+    {
+      "id": "5991c903d75cc852",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/consumer-protection-act-summary.md",
+      "x": 1050,
+      "y": 1850,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "70a39867fb488bb3",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/consumer-rights.md",
+      "x": 1050,
+      "y": 2000,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "9649c6ad4e55542f",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/ocpb.md",
+      "x": 1050,
+      "y": 2150,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "be48bbdfb5fb0b77",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/debt-collection-act-2015-summary.md",
+      "x": 1050,
+      "y": 2300,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "02594e3ed2a29ae6",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/debt-collection-act-2015.md",
+      "x": 1050,
+      "y": 2450,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "c19552fa2345a655",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/debtor-rights.md",
+      "x": 1050,
+      "y": 2600,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "e2f5b5e17edc5de7",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/debt-collector-prohibitions.md",
+      "x": 1050,
+      "y": 2750,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "3bbca0104c85aeab",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/ccc-loan-guarantee-summary.md",
+      "x": 1050,
+      "y": 2900,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "fef279297582f2b9",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/loan-contract.md",
+      "x": 1050,
+      "y": 3050,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "d8a9d297dd88f3b5",
+      "type": "file",
+      "file": "wiki/03-civil-regulatory-law/guarantee-contract.md",
+      "x": 1050,
+      "y": 3200,
+      "width": 300,
+      "height": 100,
+      "color": "1"
+    },
+    {
+      "id": "1098b8c88584fdd3",
+      "type": "group",
+      "label": "Consumer & Debt",
+      "x": 1025,
+      "y": 1830,
+      "width": 350,
+      "height": 1520,
+      "color": "1"
+    },
+    {
+      "id": "24c463777c1cc96a",
+      "type": "group",
+      "label": "Legal/Civil & Regulatory Law",
+      "x": 1000,
+      "y": 0,
+      "width": 400,
+      "height": 3370,
+      "color": "1"
+    }
+  ],
+  "edges": [
+    {
+      "id": "98a94ed56ada1930",
+      "fromNode": "26596284ef6600d9",
+      "toNode": "221fd96128bb04cb",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "e41d1de3e0c5fb3b",
+      "fromNode": "26596284ef6600d9",
+      "toNode": "82fa031cfc4ed904",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "ca9ec7a645a33f5b",
+      "fromNode": "26596284ef6600d9",
+      "toNode": "229e5d6b53a325bf",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "1ea22b89b69cfc86",
+      "fromNode": "7ba8599e1342776e",
+      "toNode": "4f81d82c7ccbb345",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "77a81afbb881cdf7",
+      "fromNode": "7ba8599e1342776e",
+      "toNode": "192ac9334f006290",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "a119e0c921c6b359",
+      "fromNode": "50ce9a4ff6d74295",
+      "toNode": "59545a9b0a14788b",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "9885c68d579f2ad6",
+      "fromNode": "50ce9a4ff6d74295",
+      "toNode": "9264edc0b5f590bb",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "5dec8991dd79aea1",
+      "fromNode": "8d96163e22f44e72",
+      "toNode": "f45b97c0688900bb",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "efb25f9ed70f70af",
+      "fromNode": "8d96163e22f44e72",
+      "toNode": "f54a8697cf0538bd",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "39b7561cf3c1c98c",
+      "fromNode": "8d96163e22f44e72",
+      "toNode": "986079e3675caba1",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "16ad14e148cafb09",
+      "fromNode": "bdb2cb476978778b",
+      "toNode": "91bf65aa9eeefb46",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "072d447e7b987826",
+      "fromNode": "bdb2cb476978778b",
+      "toNode": "a42fa33318e1fd22",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "7c05c605131b1779",
+      "fromNode": "bdb2cb476978778b",
+      "toNode": "a573ac8578321b70",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "e7b07ffef4ff49c8",
+      "fromNode": "0a73dbdad1e0f50b",
+      "toNode": "ad1feda494711872",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "1f5239c791ddead4",
+      "fromNode": "0a73dbdad1e0f50b",
+      "toNode": "e5faa0dac13ddfa5",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "20b6da981ace84a8",
+      "fromNode": "0a73dbdad1e0f50b",
+      "toNode": "b991896fe80cddac",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "709578c40100c7bf",
+      "fromNode": "deda0d064a6cad1a",
+      "toNode": "8cb2dbed24e39dc0",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "02c28fe1a42bf895",
+      "fromNode": "deda0d064a6cad1a",
+      "toNode": "26cc9a3bfe5690be",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "d38b975cc05daee0",
+      "fromNode": "deda0d064a6cad1a",
+      "toNode": "4feac2ed3abda2f4",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "b27fdbb0a4244e52",
+      "fromNode": "5991c903d75cc852",
+      "toNode": "70a39867fb488bb3",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "e95909213529be47",
+      "fromNode": "5991c903d75cc852",
+      "toNode": "9649c6ad4e55542f",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "3f161516c5b3f8c6",
+      "fromNode": "be48bbdfb5fb0b77",
+      "toNode": "02594e3ed2a29ae6",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "7762193ded4af432",
+      "fromNode": "be48bbdfb5fb0b77",
+      "toNode": "c19552fa2345a655",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "0aea92a73de9a218",
+      "fromNode": "be48bbdfb5fb0b77",
+      "toNode": "e2f5b5e17edc5de7",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "c4ee1b2e9afad411",
+      "fromNode": "3bbca0104c85aeab",
+      "toNode": "fef279297582f2b9",
+      "toEnd": "arrow"
+    },
+    {
+      "id": "ed4a85a50907c674",
+      "fromNode": "3bbca0104c85aeab",
+      "toNode": "d8a9d297dd88f3b5",
+      "toEnd": "arrow"
+    }
+  ]
+}

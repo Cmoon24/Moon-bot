@@ -1,0 +1,10 @@
+filters:
+  and:
+    - file.hasTag("concept")
+views:
+  - type: table
+    name: All Concepts
+    order:
+      - file.name
+      - date
+      - tags

@@ -231,27 +231,28 @@ def init_db():
     except Exception as e:
         logger.error(f"Error initializing database: {e}")
 
-# Call init_db immediately
+# Call init_db and preload knowledge base immediately
 init_db()
+
+OBSIDIAN_VAULT_PATH = os.environ.get(
+    "OBSIDIAN_VAULT_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "knowledge")
+)
 
 # Caching variables for Obsidian knowledge
 obsidian_knowledge_cache = ""
-obsidian_cache_last_loaded = 0.0
-OBSIDIAN_CACHE_TTL = 300.0 # 5 minutes in seconds
 obsidian_lock = threading.Lock()
 
 def load_obsidian_knowledge(vault_path):
-    global obsidian_knowledge_cache, obsidian_cache_last_loaded
-    now = time.time()
+    global obsidian_knowledge_cache
     
-    # Return cache if TTL has not expired
-    if obsidian_knowledge_cache and (now - obsidian_cache_last_loaded < OBSIDIAN_CACHE_TTL):
+    # Return cache if already loaded to avoid dynamic disk I/O on request path
+    if obsidian_knowledge_cache:
         return obsidian_knowledge_cache
         
     with obsidian_lock:
         # Double check cache within lock
-        now = time.time()
-        if obsidian_knowledge_cache and (now - obsidian_cache_last_loaded < OBSIDIAN_CACHE_TTL):
+        if obsidian_knowledge_cache:
             return obsidian_knowledge_cache
             
         if not vault_path or not os.path.exists(vault_path):
@@ -279,12 +280,14 @@ def load_obsidian_knowledge(vault_path):
                             logger.error(f"Error reading file {file_path}: {e}")
                             
             obsidian_knowledge_cache = "\n\n".join(knowledge_text)
-            obsidian_cache_last_loaded = now
             logger.info(f"Successfully loaded {len(knowledge_text)} files from Obsidian vault.")
         except Exception as e:
             logger.error(f"Error walking vault path {vault_path}: {e}")
             
     return obsidian_knowledge_cache
+
+# Preload the knowledge base
+load_obsidian_knowledge(OBSIDIAN_VAULT_PATH)
 
 # Limits to save tokens and prevent billing abuse
 RATE_LIMIT_PER_MINUTE = 5
@@ -835,6 +838,161 @@ def handle_unfollow(event):
 
 executor = ThreadPoolExecutor(max_workers=20)
 
+from urllib.parse import urlparse
+
+ALLOWED_DOMAINS = {
+    "krisdika.go.th": "https://www.krisdika.go.th",
+    "mol.go.th": "https://www.mol.go.th",
+    "labour.go.th": "https://www.labour.go.th",
+    "ocpb.go.th": "https://www.ocpb.go.th",
+    "led.go.th": "https://www.led.go.th",
+    "moj.go.th": "https://www.moj.go.th",
+    "police.go.th": "https://www.police.go.th"
+}
+
+def sanitize_url(url):
+    """
+    Validates and cleans deep links to prevent 404.
+    If the URL belongs to an allowed domain, it is rewritten to the safe homepage URL.
+    Otherwise, it falls back to krisdika homepage.
+    """
+    if not url:
+        return "https://www.krisdika.go.th"
+        
+    url = url.strip()
+    if not (url.startswith("http://") or url.startswith("https://")):
+        url = "https://" + url
+        
+    try:
+        parsed_url = urlparse(url)
+        netloc = parsed_url.netloc.lower()
+        matched_homepage = None
+        for domain, homepage in ALLOWED_DOMAINS.items():
+            if netloc == domain or netloc.endswith("." + domain):
+                matched_homepage = homepage
+                break
+        if matched_homepage:
+            return matched_homepage
+        return "https://www.krisdika.go.th"
+    except Exception as e:
+        logger.error(f"Error sanitizing URL {url}: {e}")
+        return "https://www.krisdika.go.th"
+
+def parse_gemini_response(response_text):
+    """
+    Robustly parses Gemini response. Strips markdown fences, parses JSON,
+    and falls back to escape-aware Regex extraction if JSON fails.
+    """
+    raw_text = response_text.strip()
+    
+    # Strip markdown code blocks if present
+    if raw_text.startswith("```"):
+        first_newline = raw_text.find("\n")
+        if first_newline != -1:
+            last_backticks = raw_text.rfind("```")
+            if last_backticks > first_newline:
+                raw_text = raw_text[first_newline+1:last_backticks].strip()
+            else:
+                raw_text = raw_text[first_newline+1:].strip()
+                
+    is_legal_question = True
+    summary = ""
+    full = ""
+    sources = []
+    
+    # Try standard JSON parsing first
+    try:
+        data = json.loads(raw_text)
+        is_legal_question = data.get("is_legal_question", True)
+        summary = data.get("summary", "")
+        full = data.get("full", "")
+        
+        if not summary or not full:
+            raise ValueError("JSON missing summary or full key")
+            
+        sources_list = data.get("sources", [])
+        if isinstance(sources_list, list):
+            for item in sources_list:
+                if isinstance(item, dict):
+                    title = item.get("title", "")
+                    url = item.get("url", "")
+                else:
+                    title = getattr(item, "title", "")
+                    url = getattr(item, "url", "")
+                if title and url:
+                    sources.append({"title": title, "url": sanitize_url(url)})
+        return is_legal_question, summary, full, sources
+    except Exception as json_err:
+        logger.warning(f"Failed to parse Gemini JSON: {json_err}. Falling back to regex extraction.")
+        
+    # Regex Fallback
+    is_legal_match = re.search(r'"is_legal_question"\s*:\s*(true|false)', raw_text, re.IGNORECASE)
+    if is_legal_match:
+        is_legal_question = is_legal_match.group(1).lower() == 'true'
+        
+    # Escape-aware regex for summary
+    summary_match = re.search(r'"summary"\s*:\s*"((?:[^"\\]|\\.)*)"', raw_text, re.DOTALL)
+    if summary_match:
+        try:
+            summary = summary_match.group(1).encode('raw_unicode_escape').decode('unicode-escape', errors='ignore')
+        except Exception:
+            summary = summary_match.group(1)
+    else:
+        # Fallback for truncated/unclosed summary string
+        trunc_summary = re.search(r'"summary"\s*:\s*"(.*)', raw_text, re.DOTALL)
+        if trunc_summary:
+            summary = trunc_summary.group(1)
+            for marker in ['",', '"\n', '"\r', '" }', '"}']:
+                if marker in summary:
+                    summary = summary.split(marker)[0]
+                    break
+                    
+    # Escape-aware regex for full
+    full_match = re.search(r'"full"\s*:\s*"((?:[^"\\]|\\.)*)"', raw_text, re.DOTALL)
+    if full_match:
+        try:
+            full = full_match.group(1).encode('raw_unicode_escape').decode('unicode-escape', errors='ignore')
+        except Exception:
+            full = full_match.group(1)
+    else:
+        # Fallback for truncated/unclosed full string
+        trunc_full = re.search(r'"full"\s*:\s*"(.*)', raw_text, re.DOTALL)
+        if trunc_full:
+            full = trunc_full.group(1)
+            for marker in ['",', '"\n', '"\r', '" }', '"}']:
+                if marker in full:
+                    full = full.split(marker)[0]
+                    break
+                    
+    # Escape-aware regex for sources
+    sources_section = re.search(r'"sources"\s*:\s*\[(.*?)\]', raw_text, re.DOTALL)
+    if sources_section:
+        items = re.findall(r'\{\s*"title"\s*:\s*"(.*?)"\s*,\s*"url"\s*:\s*"(.*?)"\s*\}', sources_section.group(1), re.DOTALL)
+        for title_raw, url_raw in items:
+            try:
+                title = title_raw.encode('raw_unicode_escape').decode('unicode-escape', errors='ignore')
+                url = url_raw.encode('raw_unicode_escape').decode('unicode-escape', errors='ignore')
+            except Exception:
+                title = title_raw
+                url = url_raw
+            sources.append({"title": title.strip(), "url": sanitize_url(url.strip())})
+            
+    # Clean up backslashes and escaped quotes
+    summary = summary.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
+    full = full.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
+    
+    # Final fallback if both are completely empty or regex failed (prevent raw JSON bubbles)
+    if not summary and not full:
+        # Strip all braces/JSON syntax to present clean text
+        cleaned_text = re.sub(r'[{}\[\]"\'\\]', '', raw_text)
+        # Remove keys if present
+        for key in ['is_legal_question: true,', 'is_legal_question: false,', 'summary:', 'full:', 'sources:']:
+            cleaned_text = cleaned_text.replace(key, '')
+        full = cleaned_text.strip()
+        summary = (full[:400] + "...\n\n(นี่คือคำตอบย่อ กรุณากดปุ่มด้านล่างเพื่อดูคำตอบเต็ม)") if len(full) > 400 else full
+        
+    return is_legal_question, summary, full, sources
+
 def process_message_async(event):
     try:
         user_message = scrub_pii(event.message.text)
@@ -1011,9 +1169,8 @@ def process_message_async(event):
             return
 
         try:
-            # Load Obsidian knowledge dynamically
-            obsidian_vault_path = os.environ.get("OBSIDIAN_VAULT_PATH", r"c:\llm wiki\gemini second brain")
-            knowledge_base = load_obsidian_knowledge(obsidian_vault_path)
+            # Use preloaded knowledge base
+            knowledge_base = load_obsidian_knowledge(OBSIDIAN_VAULT_PATH)
             
             # Combine system instruction with knowledge base
             full_system_prompt = SYSTEM_PROMPT
@@ -1030,7 +1187,7 @@ def process_message_async(event):
                 )
             ]
             
-            max_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", 1500))
+            max_tokens = int(os.environ.get("GEMINI_MAX_OUTPUT_TOKENS", 3000))
             response = gemini_client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=gemini_contents,
@@ -1047,79 +1204,18 @@ def process_message_async(event):
             if total_tokens > 0:
                 update_quota_tokens(user_id, req_timestamp, total_tokens)
             
-            try:
-                response_json = json.loads(response.text)
-                is_legal_question = response_json.get("is_legal_question", True)
-                summary = response_json.get("summary", "")
-                full = response_json.get("full", "")
-                sources = response_json.get("sources", [])
-                if not isinstance(sources, list):
-                    sources = []
+            # Robustly parse response (combining JSON and escape-aware regex fallback)
+            is_legal_question, summary, full, sources = parse_gemini_response(response.text)
+            
+            # Format and append sources
+            formatted_sources = []
+            for s in sources:
+                formatted_sources.append(f"- {s['title']}\n  🔗 {s['url']}")
                 
-                if not summary or not full:
-                    raise ValueError("JSON missing summary or full key")
-                
-                # Filter and format sources
-                formatted_sources = []
-                for item in sources:
-                    if isinstance(item, dict):
-                        title = item.get("title", "")
-                        url = item.get("url", "")
-                    else:
-                        title = getattr(item, "title", "")
-                        url = getattr(item, "url", "")
-                    
-                    if title and url:
-                        # Clean up URL format
-                        url = url.strip()
-                        if not (url.startswith("http://") or url.startswith("https://")):
-                            url = "https://" + url
-                        formatted_sources.append(f"- {title}\n  🔗 {url}")
-                
-                if formatted_sources:
-                    sources_text = "\n\n🌐 แหล่งอ้างอิงของรัฐบาล/กฎหมาย:\n" + "\n".join(formatted_sources)
-                    summary += sources_text
-                    full += sources_text
-                    
-            except (json.JSONDecodeError, ValueError) as json_err:
-                logger.warning(f"Failed to parse Gemini JSON: {json_err}. Falling back to regex extraction.")
-                # Use regex to extract summary and full answer from truncated or malformed JSON
-                import re
-                is_legal_match = re.search(r'"is_legal_question"\s*:\s*(true|false)', response.text, re.IGNORECASE)
-                is_legal_question = False if (is_legal_match and is_legal_match.group(1).lower() == 'false') else True
-                summary_match = re.search(r'"summary"\s*:\s*"(.*?)"', response.text, re.DOTALL)
-                full_match = re.search(r'"full"\s*:\s*"(.*?)"', response.text, re.DOTALL)
-                
-                if summary_match or full_match:
-                    try:
-                        # Decode using raw_unicode_escape and unicode-escape to prevent corrupting Thai text (Mojibake)
-                        summary = summary_match.group(1).encode('raw_unicode_escape').decode('unicode-escape', errors='ignore') if summary_match else ""
-                    except Exception:
-                        summary = summary_match.group(1) if summary_match else ""
-                        
-                    try:
-                        # Decode using raw_unicode_escape and unicode-escape to prevent corrupting Thai text (Mojibake)
-                        full = full_match.group(1).encode('raw_unicode_escape').decode('unicode-escape', errors='ignore') if full_match else ""
-                    except Exception:
-                        full = full_match.group(1) if full_match else ""
-                    
-                    # Replace escaped newlines and double quotes
-                    summary = summary.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
-                    full = full.replace('\\n', '\n').replace('\\"', '"').replace('\\\\', '\\')
-
-                    # หากตัวใดตัวหนึ่งหายไป ให้ใช้อีกตัวแทนเพื่อป้องกันข้อความเปล่าหรือส่งข้อความ JSON ดิบ
-                    if summary and not full:
-                        full = summary
-                    elif full and not summary:
-                        summary = (full[:400] + "...\n\n(นี่คือคำตอบย่อ กรุณากดปุ่มด้านล่างเพื่อดูคำตอบเต็ม)") if len(full) > 400 else full
-                else:
-                    summary = ""
-                    full = ""
-    
-                if not summary or not full:
-                    # If regex fails completely, fall back to raw text stripping JSON structure
-                    full = response.text
-                    summary = (full[:400] + "...\n\n(นี่คือคำตอบย่อ กรุณากดปุ่มด้านล่างเพื่อดูคำตอบเต็ม)") if len(full) > 400 else full
+            if formatted_sources:
+                sources_text = "\n\n🌐 แหล่งอ้างอิงของรัฐบาล/กฎหมาย:\n" + "\n".join(formatted_sources)
+                summary += sources_text
+                full += sources_text
     
             # Cache the full response in database
             cache_full_response(user_id, full)
